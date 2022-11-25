@@ -3,22 +3,17 @@ import 'package:provider/provider.dart';
 
 import '../app_provider.dart';
 
-class Home extends StatefulWidget {
+class Home extends StatelessWidget {
   const Home({super.key, required this.title});
 
   final String title;
 
   @override
-  State<Home> createState() => _HomeState();
-}
-
-class _HomeState extends State<Home> {
-  @override
   Widget build(BuildContext context) {
     print("build");
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(title),
       ),
       body: Center(
         child: Column(
@@ -36,8 +31,8 @@ class _HomeState extends State<Home> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Consumer<AppProvider>(
-                  builder: (context, value, child) => FloatingActionButton(
-                    onPressed: () => context.read<AppProvider>().decreacement,
+                  builder: (context, appProvider, child) => FloatingActionButton(
+                    onPressed: () => appProvider.decreacement,
                     tooltip: 'Decreament',
                     child: const Icon(Icons.remove),
                   ),
