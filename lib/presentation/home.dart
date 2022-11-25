@@ -16,40 +16,39 @@ class Home extends StatelessWidget {
         title: Text(title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '${context.watch<AppProvider>().counter}',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Consumer<AppProvider>(
-                  builder: (context, appProvider, child) => FloatingActionButton(
-                    onPressed: () => appProvider.decreacement,
-                    tooltip: 'Decreament',
-                    child: const Icon(Icons.remove),
-                  ),
-                ),
-                FloatingActionButton(
-                  onPressed: () => context.read<AppProvider>().reset,
-                  tooltip: 'Reset',
-                  child: const Icon(Icons.restore_outlined),
-                ),
-                FloatingActionButton(
-                  onPressed: () => context.read<AppProvider>().increment,
-                  tooltip: 'Increment',
-                  child: const Icon(Icons.add),
-                ),
-              ],
-            ),
-          ],
+        child: Consumer<AppProvider>(
+          builder: (context, appProvider, child) => Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text(
+                'You have pushed the button this many times:',
+              ),
+              Text(
+                '${appProvider.counter}',
+                style: Theme.of(context).textTheme.headline4,
+              ),
+              Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    FloatingActionButton(
+                      onPressed: () => context.read<AppProvider>().decreacement,
+                      tooltip: 'Decreament',
+                      child: const Icon(Icons.remove),
+                    ),
+                    FloatingActionButton(
+                      onPressed: () => context.read<AppProvider>().reset,
+                      tooltip: 'Reset',
+                      child: const Icon(Icons.restore_outlined),
+                    ),
+                    FloatingActionButton(
+                      onPressed: () => appProvider.increment,
+                      tooltip: 'Increment',
+                      child: const Icon(Icons.add),
+                    ),
+                  ]),
+            ],
+          ),
         ),
       ),
     );
