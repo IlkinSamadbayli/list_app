@@ -11,6 +11,7 @@ class AppProvider extends ChangeNotifier {
 
   void get decreacement {
     _counter--;
+    if(_counter==-1) _counter=0;
     notifyListeners();
   }
 
