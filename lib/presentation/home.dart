@@ -32,12 +32,12 @@ class Home extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     FloatingActionButton(
-                      onPressed: () => context.read<AppProvider>().decreacement,
+                      onPressed: () => appProvider.decreacement,
                       tooltip: 'Decreament',
                       child: const Icon(Icons.remove),
                     ),
                     FloatingActionButton(
-                      onPressed: () => context.read<AppProvider>().reset,
+                      onPressed: () => appProvider.reset,
                       tooltip: 'Reset',
                       child: const Icon(Icons.restore_outlined),
                     ),
