@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:provider_test/presentation/product_lists.dart';
 import 'package:sizer/sizer.dart';
 
 import '../app_provider.dart';
@@ -11,7 +12,6 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("build");
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -22,25 +22,7 @@ class Home extends StatelessWidget {
           Expanded(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ListView.separated(
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 12),
-                itemCount: 4,
-                itemBuilder: (context, index) => Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.blue,
-                  ),
-                  width: 40,
-                  height: 8.h,
-                  child: ListTile(
-                    leading: Text(
-                      "${index + 1}",
-                    ),
-                    title: const Text("Name"),
-                  ),
-                ),
-              ),
+              child: const ProductLists(),
             ),
           ),
           Expanded(
@@ -84,3 +66,7 @@ class Home extends StatelessWidget {
     );
   }
 }
+
+
+
+
