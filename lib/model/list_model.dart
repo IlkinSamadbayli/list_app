@@ -1,11 +1,9 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-class ProductModel {
+class ListModel {
   String name;
   String expression;
-   bool isChecked;
-  ProductModel({
+  ListModel({
     required this.name,
     required this.expression,
-    required this.isChecked,
   });
 }
