@@ -2,8 +2,16 @@ import 'package:flutter/material.dart';
 
 
 class AppProvider extends ChangeNotifier {
+bool isChecked = false;
   int _counter = 0;
   int get counter => _counter;
+
+
+void get checked{
+  isChecked=!isChecked;
+  notifyListeners();
+}
+
 
   void get increment {
     _counter++;

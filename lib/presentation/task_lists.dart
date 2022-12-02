@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider_test/model/list_data.dart';
-import 'package:provider_test/model/list_model.dart';
 import 'package:provider_test/presentation/list_item.dart';
 import 'package:sizer/sizer.dart';
 
@@ -16,7 +15,6 @@ class TaskLists extends StatelessWidget {
       separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemCount: listData.toDoLists.length,
       itemBuilder: (context, index) {
-        ListModel item = listData.toDoLists[index];
         return Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
@@ -24,7 +22,7 @@ class TaskLists extends StatelessWidget {
           ),
           width: 40,
           height: 8.h,
-          child: ListItem(item: item),
+          child: ListItem(item: listData.toDoLists[index]),
         );
       },
     );
