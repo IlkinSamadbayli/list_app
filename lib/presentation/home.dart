@@ -130,7 +130,7 @@ class _HomeState extends State<Home> {
                   listData.toDoLists.add(
                     ListModel(
                       name: nameController.text,
-                      expression: expressionController.text,
+                      description: expressionController.text,
                     ),
                   );
                   nameController.clear();
