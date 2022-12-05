@@ -67,7 +67,7 @@ class _HomeState extends State<Home> {
                   if (value.taskLists.isNotEmpty)
                     Positioned(
                       top: 8,
-                      right: -3,
+                      right: 2,
                       child: Container(
                         padding: const EdgeInsets.all(3),
                         decoration: BoxDecoration(
