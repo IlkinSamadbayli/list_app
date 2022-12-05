@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:provider_test/style.dart';
 import 'package:sizer/sizer.dart';
 
-import 'app_provider.dart';
+import 'list_provider.dart';
 import 'presentation/home.dart';
 
 void main() {
   runApp(
     ChangeNotifierProvider(
-      create: (context) => AppProvider(),
+      create: (context) => ListProvider(),
       child: const MyApp(),
     ),
   );
@@ -25,8 +26,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'My Test Page',
         theme: ThemeData(
-          primaryColor: const Color(0xffD23369),
-          primarySwatch: Colors.blue,
+          primaryColor: CustomColor.mainColor,
         ),
         home: const Home(title: "Home Page"),
       ),
