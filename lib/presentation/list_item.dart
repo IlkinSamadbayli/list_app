@@ -1,8 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import 'package:provider_test/list_provider.dart';
+import 'package:provider_test/provider/list_provider.dart';
 import 'package:provider_test/model/list_model.dart';
 import 'package:provider_test/style.dart';
 
@@ -26,19 +24,25 @@ class _ListItemState extends State<ListItem> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Checkbox(
-          value: isChecked,
-          onChanged: (value) {
-            setState(() {});
-            isChecked = value!;
-          }),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      leading: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: Checkbox(
+            activeColor: CustomColor.errorColor,
+            value: isChecked,
+            onChanged: (value) {
+              setState(() {});
+              isChecked = value!;
+            }),
+      ),
       title: Column(
         children: [
-          const SizedBox(height: 8),
+          const SizedBox(height: 14),
           Text(
             widget.item.title,
             style: TextStyle(
-              color: CustomColor.textColor,
+              fontSize: 24,
+              color: CustomColor.versionColorWhite,
               fontWeight: FontWeight.bold,
               decoration:
                   isChecked ? TextDecoration.lineThrough : TextDecoration.none,
@@ -47,24 +51,13 @@ class _ListItemState extends State<ListItem> {
           Text(
             widget.item.description,
             style: TextStyle(
-              color: CustomColor.textColor,
+              color: CustomColor.versionColorWhite.withOpacity(.6),
               fontStyle: FontStyle.italic,
               decoration:
                   isChecked ? TextDecoration.lineThrough : TextDecoration.none,
             ),
           ),
         ],
-      ),
-      trailing: Consumer<ListProvider>(
-        builder: (context, value, child) => GestureDetector(
-          onTap: () {
-            // value.removeItem;
-          },
-          child: Icon(
-            Icons.delete,
-            color: CustomColor.errorColor,
-          ),
-        ),
       ),
     );
   }

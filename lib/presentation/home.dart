@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:provider_test/model/list_model.dart';
+import 'package:provider_test/presentation/removed_list.dart';
 import 'package:provider_test/presentation/task_lists.dart';
 import 'package:provider_test/style.dart';
 import 'package:provider_test/style/border_style.dart';
 import 'package:sizer/sizer.dart';
 
-import '../list_provider.dart';
+import '../provider/list_provider.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key, required this.title});
@@ -24,6 +26,7 @@ class _HomeState extends State<Home> {
   late FocusNode titleFocus;
   late FocusNode descriptionFocus;
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  final formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -58,7 +61,9 @@ class _HomeState extends State<Home> {
                 clipBehavior: Clip.none,
                 alignment: Alignment.centerLeft,
                 children: [
-                  const Icon(Icons.delete),
+                  IconButton(
+                      onPressed: ()  {Get.to(() => const RemovedList());},
+                      icon: const Icon(Icons.delete)),
                   if (value.taskLists.isNotEmpty)
                     Positioned(
                       top: 8,
@@ -106,10 +111,14 @@ class _HomeState extends State<Home> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  FloatingActionButton(
-                    onPressed: () {},
-                    tooltip: 'Delete',
-                    child: const Icon(Icons.delete),
+                  Consumer<ListProvider>(
+                    builder: (context, value, child) => FloatingActionButton(
+                      onPressed: () {
+                        value.removedLists;
+                      },
+                      tooltip: 'Delete',
+                      child: const Icon(Icons.delete),
+                    ),
                   ),
                   const SizedBox(width: 16),
                   FloatingActionButton(
@@ -140,40 +149,68 @@ class _HomeState extends State<Home> {
               left: 20,
               right: 20,
               bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: ListView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
-            shrinkWrap: true,
-            children: [
-              TextField(
-                decoration: AppBorder.kBorderDecoration(hintText: "Enter name"),
-                controller: titleController,
-                focusNode: titleFocus,
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                decoration:
-                    AppBorder.kBorderDecoration(hintText: "Enter information"),
-                controller: descriptionController,
-                focusNode: descriptionFocus,
-              ),
-              const SizedBox(height: 20),
-              Consumer<ListProvider>(
-                builder: (context, value, child) => ElevatedButton(
-                  style: AppBorder.kButtonStyle,
-                  onPressed: () {
-                    value.addItem(ListModel(
-                        title: titleController.text,
-                        description: descriptionController.text));
-                    print(value.taskLists);
-                    titleController.clear();
-                    descriptionController.clear();
-                    Navigator.pop(context);
+          child: Form(
+            key: formKey,
+            child: ListView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
+              shrinkWrap: true,
+              children: [
+                TextFormField(
+                  validator: (title) {
+                    if (title!.isEmpty) {
+                      return "The title is empty";
+                    }
+                    return null;
                   },
-                  child: const Text("Add"),
+                  decoration:
+                      AppBorder.kBorderDecoration(hintText: "Enter name"),
+                  controller: titleController,
+                  focusNode: titleFocus,
                 ),
-              ),
-              const SizedBox(height: 20),
-            ],
+                const SizedBox(height: 20),
+                TextFormField(
+                  validator: (dec) {
+                    if (dec!.isEmpty) {
+                      return "The description is empty";
+                    }
+                    return null;
+                  },
+                  decoration: AppBorder.kBorderDecoration(
+                      hintText: "Enter description"),
+                  controller: descriptionController,
+                  focusNode: descriptionFocus,
+                ),
+                const SizedBox(height: 20),
+                Consumer<ListProvider>(
+                  builder: (context, value, child) => ElevatedButton(
+                    style: AppBorder.kButtonStyle,
+                    onPressed: () {
+                      if (formKey.currentState!.validate()) {
+                        value.addItem(ListModel(
+                            title: titleController.text,
+                            description: descriptionController.text));
+                        titleController.clear();
+                        descriptionController.clear();
+                        Navigator.pop(context);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              action: SnackBarAction(
+                                label: "Undo",
+                                onPressed: () => Get.back(),
+                              ),
+                              content: const Text("Error"),
+                              dismissDirection: DismissDirection.up,
+                              backgroundColor: CustomColor.errorColor),
+                        );
+                      }
+                    },
+                    child: const Text("Add"),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         );
       },
