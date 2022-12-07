@@ -31,10 +31,10 @@ class _RemovedScreenState extends State<RemovedScreen> {
         actions: [
           GestureDetector(
               onTap: () {
-                removedProvider.returnList();
+                removedProvider.returnList;
               },
               child: const Padding(
-                padding: EdgeInsets.only(right: 8),
+                padding: EdgeInsets.only(right: 12),
                 child: Icon(Icons.recycling_outlined),
               ))
         ],
@@ -83,7 +83,7 @@ class _RemovedScreenState extends State<RemovedScreen> {
                               },
                               backgroundColor: CustomColor.errorColor,
                               foregroundColor: CustomColor.versionColorWhite,
-                              icon: Icons.delete,
+                              icon: Icons.delete_forever,
                               label: 'Delete',
                             ),
                           ],

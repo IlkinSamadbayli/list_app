@@ -20,17 +20,23 @@ class ListProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void returnList() {
-    removedLists.removeWhere((element) {
-      if (element.isChecked == true) {
-        // removedLists.remove(element);
-        taskLists.add(element);
+  void get returnList {
+    removedLists.removeWhere((e) {
+      if (e.isChecked == true) {
+        taskLists.add(e);
       }
-      return element.isChecked = true;
+      return e.isChecked == true;
     });
     for (var el in taskLists) {
       el.isChecked = false;
     }
+    notifyListeners();
+  }
+
+  void get emptyTrash {
+    removedLists.removeWhere((element) {
+      return element.isChecked == true;
+    });
     notifyListeners();
   }
 
@@ -55,13 +61,6 @@ class ListProvider extends ChangeNotifier {
 
   void deleteItem(ListModel item) {
     removedLists.remove(item);
-    notifyListeners();
-  }
-
-  void get emptyTrash {
-    removedLists.removeWhere((element) {
-      return element.isChecked == true;
-    });
     notifyListeners();
   }
 }
