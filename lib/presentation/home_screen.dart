@@ -183,6 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void get triggerBottomSheet {
     showModalBottomSheet(
+      
       shape: RoundedRectangleBorder(
           side: BorderSide(width: 4, color: CustomColor.borderColor),
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24))),

@@ -1,3 +1,15 @@
+// import 'package:flutter/src/widgets/container.dart';
+// import 'package:flutter/src/widgets/framework.dart';
+
+// class TaskLists extends StatelessWidget {
+//   const TaskLists({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container();
+//   }
+// }
+
 // import 'package:flutter/material.dart';
 // import 'package:flutter_slidable/flutter_slidable.dart';
 // import 'package:get/get.dart';
@@ -8,22 +20,15 @@
 // import 'package:provider_test/style/custom_color.dart';
 // import 'package:sizer/sizer.dart';
 
-// import '../style/border_style.dart';
 // import 'list_item.dart';
 
-// class TaskLists extends StatefulWidget {
+// class TaskLists extends StatelessWidget {
 //   const TaskLists({
 //     Key? key,
 //   }) : super(key: key);
 
 //   @override
-//   State<TaskLists> createState() => _TaskListsState();
-// }
-
-// class _TaskListsState extends State<TaskLists> {
-//   @override
 //   Widget build(BuildContext context) {
-//     final listKey = GlobalKey<FormState>();
 //     ListProvider appProvider = Provider.of(context);
 //     return ListView.separated(
 //       shrinkWrap: true,
