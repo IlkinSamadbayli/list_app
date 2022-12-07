@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:provider_test/model/list_model.dart';
 import 'package:provider_test/presentation/removed_screen.dart';
+import 'package:provider_test/presentation/task_lists.dart';
 import 'package:provider_test/style/custom_color.dart';
 import 'package:provider_test/style/border_style.dart';
 import 'package:sizer/sizer.dart';
 
 import '../provider/list_provider.dart';
-import 'list_item.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,6 +18,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final kviewInsets = EdgeInsets.fromWindowPadding(
+      WidgetsBinding.instance.window.viewInsets,
+      WidgetsBinding.instance.window.devicePixelRatio);
   late final TextEditingController titleController;
   late final TextEditingController descriptionController;
   late FocusNode titleFocus;
@@ -47,8 +49,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ListProvider appProvider = Provider.of(context);
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       key: scaffoldKey,
       appBar: AppBar(
         title: const Text("Start a new Routine"),
@@ -99,54 +101,9 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         child: Column(
           children: [
-            SizedBox(height: 5.h),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 12),
-                  itemCount: appProvider.taskLists.length,
-                  itemBuilder: (context, index) {
-                    ListProvider listProvider = Provider.of(context);
-                    ListModel item = listProvider.taskLists[index];
-                    return Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(40),
-                        color: CustomColor.primaryColor,
-                      ),
-                      width: 40,
-                      height: 10.h,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(40),
-                        child: Slidable(
-                          startActionPane: ActionPane(
-                            motion: const ScrollMotion(),
-                            children: [
-                              SlidableAction(
-                                onPressed: (context) {
-                                  listProvider.removeItem(item);
-                                },
-                                backgroundColor: CustomColor.errorColor,
-                                foregroundColor: CustomColor.versionColorWhite,
-                                icon: Icons.delete,
-                                label: 'Delete',
-                              ),
-                            ],
-                          ),
-                          child: ListItem(
-                            item: item,
-                            index: index,
-                            listProvider: listProvider,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
+            SizedBox(height: 2.h),
+            const TaskLists(),
+            SizedBox(height: 2.h),
             Padding(
               padding: const EdgeInsets.only(right: 20, bottom: 20),
               child: Row(
@@ -183,83 +140,86 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void get triggerBottomSheet {
     showModalBottomSheet(
-      
       shape: RoundedRectangleBorder(
           side: BorderSide(width: 4, color: CustomColor.borderColor),
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24))),
       context: context,
       builder: (BuildContext context) {
-        return SingleChildScrollView(
-          child: Container(
-            padding: EdgeInsets.only(
-                top: 50,
-                left: 20,
-                right: 20,
-                bottom: MediaQuery.of(context).viewInsets.bottom),
-            child: Form(
-              key: formKey,
-              child: ListView(
-                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
-                shrinkWrap: true,
-                children: [
-                  TextFormField(
-                    validator: (title) {
-                      if (title!.isEmpty) {
-                        return "The title is empty";
-                      }
-                      return null;
-                    },
-                    decoration:
-                        AppBorder.kBorderDecoration(hintText: "Enter name"),
-                    controller: titleController,
-                    focusNode: titleFocus,
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    validator: (dec) {
-                      if (dec!.isEmpty) {
-                        return "The description is empty";
-                      }
-                      return null;
-                    },
-                    decoration: AppBorder.kBorderDecoration(
-                        hintText: "Enter description"),
-                    controller: descriptionController,
-                    focusNode: descriptionFocus,
-                  ),
-                  const SizedBox(height: 20),
-                  Consumer<ListProvider>(
-                    builder: (context, value, child) {
-                      return ElevatedButton(
-                        style: AppBorder.kButtonStyle,
-                        onPressed: () {
-                          if (formKey.currentState!.validate()) {
-                            value.addItem(ListModel(
-                                title: titleController.text,
-                                description: descriptionController.text));
-                            titleController.clear();
-                            descriptionController.clear();
-                            Navigator.pop(context);
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  action: SnackBarAction(
-                                    label: "Undo",
-                                    onPressed: () => Get.back(),
-                                  ),
-                                  content: const Text("Error"),
-                                  dismissDirection: DismissDirection.up,
-                                  backgroundColor: CustomColor.errorColor),
-                            );
-                          }
-                        },
-                        child: const Text("Add"),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              ),
+        return Container(
+          padding: 
+          // kviewInsets,
+           EdgeInsets.only(
+              top: 50,
+              left: 20,
+              right: 20,
+              bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: Form(
+            key: formKey,
+            child: ListView(
+              keyboardDismissBehavior:
+                  ScrollViewKeyboardDismissBehavior.manual,
+              shrinkWrap: true,
+              children: [
+                TextFormField(
+                  textInputAction: TextInputAction.next,
+                  validator: (title) {
+                    if (title!.isEmpty) {
+                      return "The title is empty";
+                    }
+                    return null;
+                  },
+                  decoration:
+                      AppBorder.kBorderDecoration(hintText: "Enter name"),
+                  controller: titleController,
+                  focusNode: titleFocus,
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  textInputAction: TextInputAction.done,
+
+                  validator: (dec) {
+                    if (dec!.isEmpty) {
+                      return "The description is empty";
+                    }
+                    return null;
+                  },
+                  decoration: AppBorder.kBorderDecoration(
+                      hintText: "Enter description"),
+                  controller: descriptionController,
+                  focusNode: descriptionFocus,
+                ),
+                const SizedBox(height: 20),
+                Consumer<ListProvider>(
+                  builder: (context, value, child) {
+                    return ElevatedButton(
+                      style: AppBorder.kButtonStyle,
+                      onPressed: () {
+                        if (formKey.currentState!.validate()) {
+                          value.addItem(ListModel(
+                              title: titleController.text,
+                              description: descriptionController.text));
+                          titleController.clear();
+                          descriptionController.clear();
+                          Navigator.pop(context);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                action: SnackBarAction(
+                                  label: "Undo",
+                                  onPressed: () => Get.back(),
+                                ),
+                                content: const Text("Error"),
+                                dismissDirection: DismissDirection.up,
+                                backgroundColor: CustomColor.errorColor),
+                          );
+                        }
+                      },
+                      child: const Text("Add"),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
           ),
         );
