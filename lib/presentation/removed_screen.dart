@@ -41,7 +41,7 @@ class _RemovedScreenState extends State<RemovedScreen> {
       ),
       body: Column(
         children: [
-          SizedBox(height: 5.h),
+          SizedBox(height: 2.h),
           Expanded(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
