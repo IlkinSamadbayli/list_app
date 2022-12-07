@@ -1,4 +1,4 @@
-import 'package:flutter/animation.dart';
+import 'package:flutter/material.dart';
 
 class CustomColor {
   static Color errorColor = const Color(0xffFB2576);
@@ -6,4 +6,5 @@ class CustomColor {
   static Color textColor = const Color(0xff2C3639);
   static Color mainColor = const Color(0xff5F8D4E);
   static Color versionColorWhite = const Color.fromARGB(255, 212, 230, 205);
+  static Color borderColor = Colors.blue;
 }
