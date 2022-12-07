@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider_test/provider/list_provider.dart';
 import 'package:provider_test/model/list_model.dart';
-import 'package:provider_test/style.dart';
+import 'package:provider_test/style/custom_color.dart';
 
 class ListItem extends StatefulWidget {
   final ListModel item;
@@ -20,7 +20,6 @@ class ListItem extends StatefulWidget {
 }
 
 class _ListItemState extends State<ListItem> {
-  bool isChecked = false;
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -29,10 +28,10 @@ class _ListItemState extends State<ListItem> {
         padding: const EdgeInsets.only(bottom: 16),
         child: Checkbox(
             activeColor: CustomColor.errorColor,
-            value: isChecked,
+            value: widget.item.isChecked,
             onChanged: (value) {
               setState(() {});
-              isChecked = value!;
+              widget.item.isChecked = value!;
             }),
       ),
       title: Column(
@@ -45,7 +44,7 @@ class _ListItemState extends State<ListItem> {
               color: CustomColor.versionColorWhite,
               fontWeight: FontWeight.bold,
               decoration:
-                  isChecked ? TextDecoration.lineThrough : TextDecoration.none,
+                  widget.item.isChecked ? TextDecoration.lineThrough : TextDecoration.none,
             ),
           ),
           Text(
@@ -54,7 +53,7 @@ class _ListItemState extends State<ListItem> {
               color: CustomColor.versionColorWhite.withOpacity(.6),
               fontStyle: FontStyle.italic,
               decoration:
-                  isChecked ? TextDecoration.lineThrough : TextDecoration.none,
+                  widget.item.isChecked ? TextDecoration.lineThrough : TextDecoration.none,
             ),
           ),
         ],
