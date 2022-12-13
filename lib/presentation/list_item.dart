@@ -1,13 +1,15 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
-import 'package:provider_test/provider/list_provider.dart';
+
 import 'package:provider_test/model/list_model.dart';
+import 'package:provider_test/provider/list_provider.dart';
 import 'package:provider_test/style/custom_color.dart';
 
 class ListItem extends StatefulWidget {
   final ListModel item;
   final int index;
   final ListProvider listProvider;
+  // final ListProvider listProvider;
   const ListItem({
     Key? key,
     required this.item,
@@ -38,7 +40,7 @@ class _ListItemState extends State<ListItem> {
         children: [
           const SizedBox(height: 14),
           Text(
-            widget.item.title,
+            "${widget.item.title}",
             style: TextStyle(
               fontSize: 24,
               color: CustomColor.versionColorWhite,
