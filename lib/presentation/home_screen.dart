@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:provider_test/model/list_model.dart';
+import 'package:provider_test/presentation/preference_service.dart';
 import 'package:provider_test/presentation/removed_screen.dart';
 import 'package:provider_test/presentation/task_lists.dart';
 import 'package:provider_test/style/custom_color.dart';
@@ -18,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final preference = PreferenceService();
   final kviewInsets = EdgeInsets.fromWindowPadding(
       WidgetsBinding.instance.window.viewInsets,
       WidgetsBinding.instance.window.devicePixelRatio);
@@ -29,8 +31,29 @@ class _HomeScreenState extends State<HomeScreen> {
   final formKey = GlobalKey<FormState>();
   final editKey = GlobalKey<FormState>();
 
+  void saveSetting(
+      {required List<ListModel> taskLists,
+      required ListProvider listProvider}) {
+    // taskLists.map((e) => e.title = int.parse(titleController.text));
+    // taskLists.map((e) => e.description = descriptionController.text);
+    // taskLists.map((e) => e.isChecked = e.isChecked);
+    ListModel(
+        title: int.parse(titleController.text),
+        description: descriptionController.text);
+    preference.saveSetting(
+        tasklist: listProvider.taskLists, item: listProvider.item);
+  }
+
+  void populateField(ListProvider listProvider) async {
+    ListModel listModel = await preference.getSetting();
+    titleController.text = listModel.title.toString();
+    descriptionController.text = listModel.description;
+  }
+
   @override
   void initState() {
+    final listprovider = Provider.of<ListProvider>(context, listen: false);
+    populateField(listprovider);
     titleController = TextEditingController();
     descriptionController = TextEditingController();
     titleFocus = FocusNode();
@@ -49,10 +72,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final listProvider = Provider.of<ListProvider>(context);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       key: scaffoldKey,
       appBar: AppBar(
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: RawMaterialButton(
+              fillColor: Colors.blue,
+              onPressed: () => saveSetting(
+                    taskLists: listProvider.taskLists,
+                    listProvider: listProvider,
+                  ),
+              child: const Padding(
+                padding: EdgeInsets.all(16),
+                child: Text("Save Settings"),
+              )),
+        ),
         title: const Text("Start a new Routine"),
         centerTitle: true,
         actions: [
@@ -146,21 +183,21 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (BuildContext context) {
         return Container(
-          padding: 
-          // kviewInsets,
-           EdgeInsets.only(
-              top: 50,
-              left: 20,
-              right: 20,
-              bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding:
+              // kviewInsets,
+              EdgeInsets.only(
+                  top: 50,
+                  left: 20,
+                  right: 20,
+                  bottom: MediaQuery.of(context).viewInsets.bottom),
           child: Form(
             key: formKey,
             child: ListView(
-              keyboardDismissBehavior:
-                  ScrollViewKeyboardDismissBehavior.manual,
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
               shrinkWrap: true,
               children: [
                 TextFormField(
+                  keyboardType: TextInputType.number,
                   textInputAction: TextInputAction.next,
                   validator: (title) {
                     if (title!.isEmpty) {
@@ -176,7 +213,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 20),
                 TextFormField(
                   textInputAction: TextInputAction.done,
-
                   validator: (dec) {
                     if (dec!.isEmpty) {
                       return "The description is empty";
@@ -196,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () {
                         if (formKey.currentState!.validate()) {
                           value.addItem(ListModel(
-                              title: titleController.text,
+                              title: int.parse(titleController.text),
                               description: descriptionController.text));
                           titleController.clear();
                           descriptionController.clear();

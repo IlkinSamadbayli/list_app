@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import '../model/list_model.dart';
 
 class ListProvider extends ChangeNotifier {
-  List<ListModel> taskLists = [];
+ final List<ListModel> taskLists = [];
   List<ListModel> removedLists = [];
   late ListModel item;
   late final int index;
-  // Map<int index, bool false> isChecked = ;
+
+
+
 
   void addItem(ListModel item) {
     taskLists.add(item);
