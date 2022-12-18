@@ -17,8 +17,10 @@ class AppBorder {
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(color: CustomColor.errorColor, width: 3)),
       );
-  static dynamic get kButtonStyle => ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+
+  static dynamic kButtonStyle(Color color) => ElevatedButton.styleFrom(
+        backgroundColor: color,
+        padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
