@@ -115,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     builder: (context, value, child) => FloatingActionButton(
                       heroTag: "btn1",
                       onPressed: () {
-                        value.removeList;
+                        // value.removeList;
                       },
                       tooltip: 'Delete',
                       child: const Icon(Icons.delete_rounded),
@@ -206,7 +206,13 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: AppBorder.kButtonStyle(Colors.teal),
                             onPressed: () {
                               if (formKey.currentState!.validate()) {
-                                value.addItem;
+                                // value.addItem;
+                                value.taskCollection.add({
+                                  'title': titleController.text,
+                                  'description': descriptionController.text,
+                                  'isChecked': false,
+                                  'id': value.taskCollection.id,
+                                });
                                 titleController.clear();
                                 descriptionController.clear();
                                 Get.back();
