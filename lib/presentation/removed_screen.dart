@@ -6,8 +6,6 @@ import 'package:provider_test/provider/list_provider.dart';
 import 'package:provider_test/style/custom_color.dart';
 import 'package:sizer/sizer.dart';
 
-import '../model/list_model.dart';
-import 'list_item.dart';
 
 class RemovedScreen extends StatefulWidget {
   const RemovedScreen({super.key});
@@ -31,7 +29,7 @@ class _RemovedScreenState extends State<RemovedScreen> {
         actions: [
           GestureDetector(
               onTap: () {
-                removedProvider.returnList;
+                // removedProvider.returnList;
               },
               child: const Padding(
                 padding: EdgeInsets.only(right: 12),
@@ -51,7 +49,7 @@ class _RemovedScreenState extends State<RemovedScreen> {
                     const SizedBox(height: 12),
                 itemCount: removedProvider.removedLists.length,
                 itemBuilder: (context, index) {
-                  ListModel item = removedProvider.removedLists[index];
+                  // ListModel item = removedProvider.removedLists[index];
                   return Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(40),
@@ -66,7 +64,7 @@ class _RemovedScreenState extends State<RemovedScreen> {
                             ActionPane(motion: const ScrollMotion(), children: [
                           SlidableAction(
                             onPressed: (context) {
-                              removedProvider.returnItem(item);
+                              // removedProvider.returnItem(item);
                             },
                             backgroundColor: CustomColor.mainColor,
                             foregroundColor: CustomColor.versionColorWhite,
@@ -79,7 +77,7 @@ class _RemovedScreenState extends State<RemovedScreen> {
                           children: [
                             SlidableAction(
                               onPressed: (context) {
-                                removedProvider.deleteItem(item);
+                                // removedProvider.deleteItem(item);
                               },
                               backgroundColor: CustomColor.errorColor,
                               foregroundColor: CustomColor.versionColorWhite,
@@ -87,12 +85,12 @@ class _RemovedScreenState extends State<RemovedScreen> {
                               label: 'Delete',
                             ),
                           ],
-                        ),
-                        child: ListItem(
-                          item: item,
-                          index: index,
-                          listProvider: removedProvider,
-                        ),
+                        ), child: const Text("remove test"),
+                        // child: ListItem(
+                        //   item: item,
+                        //   index: index,
+                        //   listProvider: removedProvider,
+                        // ),
                       ),
                     ),
                   );
@@ -110,7 +108,7 @@ class _RemovedScreenState extends State<RemovedScreen> {
                   builder: (context, value, child) => FloatingActionButton(
                     heroTag: "btn3",
                     onPressed: () {
-                      value.emptyTrash;
+                      // value.emptyTrash;
                     },
                     tooltip: 'Delete',
                     child: const Icon(Icons.delete),
