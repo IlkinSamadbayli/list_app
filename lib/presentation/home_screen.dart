@@ -1,14 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import 'package:provider_test/presentation/preference_service.dart';
 import 'package:provider_test/presentation/removed_screen.dart';
-import 'package:provider_test/presentation/task_lists.dart';
 import 'package:provider_test/style/custom_color.dart';
 import 'package:provider_test/style/border_style.dart';
 import 'package:sizer/sizer.dart';
 
-import '../provider/list_provider.dart';
+import '../provider/task_provider.dart';
+import 'list_item.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,7 +19,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final preference = PreferenceService();
   final kviewInsets = EdgeInsets.fromWindowPadding(
       WidgetsBinding.instance.window.viewInsets,
       WidgetsBinding.instance.window.devicePixelRatio);
@@ -59,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: Consumer<ListProvider>(
+            child: Consumer<TaskProvider>(
               builder: (context, value, child) => GestureDetector(
                 onTap: () => Get.to(() => const RemovedScreen()),
                 child: Stack(
@@ -67,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   alignment: Alignment.centerLeft,
                   children: [
                     const Icon(Icons.outbox),
-                    if (value.removedLists.isNotEmpty)
+                    if (value.documentList.isNotEmpty)
                       Positioned(
                         top: 8,
                         right: 2,
@@ -78,10 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: CustomColor.errorColor,
                           ),
                           child: Text(
-                            value.removedLists.length.toString(),
-                            style: const TextStyle(
-                                // fontSize: 17,
-                                ),
+                            value.documentList.length.toString(),
                           ),
                         ),
                       ),
@@ -103,7 +100,72 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             SizedBox(height: 2.h),
-            const TaskLists(),
+            Expanded(
+              child: Consumer<TaskProvider>(
+                builder: (context, taskProvider, child) => Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: StreamBuilder(
+                    stream: taskProvider.taskCollection
+                        .where("isRemoved", isEqualTo: false)
+                        .snapshots(),
+                    builder: (context, AsyncSnapshot snapshot) {
+                      late final List<
+                              QueryDocumentSnapshot<Map<String, dynamic>>>
+                          documents = snapshot.data!.docs;
+                      if (!snapshot.hasData) {
+                        return const CircularProgressIndicator();
+                      }
+                      return ListView.separated(
+                        shrinkWrap: true,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 12),
+                        itemCount: documents.length,
+                        itemBuilder: (context, index) {
+                          Map<String, dynamic> item = documents[index].data();
+                          String docId = documents[index].id;
+                          return Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(40),
+                              color: CustomColor.primaryColor,
+                            ),
+                            width: 40,
+                            height: 10.h,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(40),
+                              child: Slidable(
+                                startActionPane: ActionPane(
+                                  motion: const ScrollMotion(),
+                                  children: [
+                                    SlidableAction(
+                                      onPressed: (context) {
+                                        taskProvider.taskCollection
+                                            .doc(docId)
+                                            .update({"isRemoved": true});
+                                      },
+                                      backgroundColor: CustomColor.errorColor,
+                                      foregroundColor:
+                                          CustomColor.versionColorWhite,
+                                      icon: Icons.delete,
+                                      label: 'Delete',
+                                    ),
+                                  ],
+                                ),
+                                child: ListItem(
+                                  taskLists: taskProvider.taskCollection,
+                                  item: item,
+                                  taskProvider: taskProvider,
+                                  docId: docId,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
             SizedBox(height: 2.h),
             Padding(
               padding: const EdgeInsets.only(right: 20, bottom: 20),
@@ -111,11 +173,32 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Consumer<ListProvider>(
-                    builder: (context, value, child) => FloatingActionButton(
+                  Consumer<TaskProvider>(
+                    builder: (context, taskProvider, child) =>
+                        FloatingActionButton(
                       heroTag: "btn1",
                       onPressed: () {
-                        // value.removeList;
+                        taskProvider.taskCollection
+                            .get()
+                            .then((documents) => {
+                                  for (var document in documents.docs)
+                                    {
+                                      if (taskProvider.documentList
+                                          .contains(document.id))
+                                        {
+                                          taskProvider.taskCollection
+                                              .doc(document.id)
+                                              .update({
+                                            'isRemoved': true,
+                                          }),
+                                        }
+                                    }
+                                })
+                            .whenComplete(() {
+                          taskProvider.clearDoclist;
+                        });
+                        print(
+                            "documentList: ${taskProvider.documentList.length}");
                       },
                       tooltip: 'Delete',
                       child: const Icon(Icons.delete_rounded),
@@ -200,38 +283,34 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     SizedBox(
                       width: 160,
-                      child: Consumer<ListProvider>(
-                        builder: (context, value, child) {
-                          return ElevatedButton(
-                            style: AppBorder.kButtonStyle(Colors.teal),
-                            onPressed: () {
-                              if (formKey.currentState!.validate()) {
-                                // value.addItem;
-                                value.taskCollection.add({
-                                  'title': titleController.text,
-                                  'description': descriptionController.text,
-                                  'isChecked': false,
-                                  'id': value.taskCollection.id,
-                                });
-                                titleController.clear();
-                                descriptionController.clear();
-                                Get.back();
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      action: SnackBarAction(
-                                        label: "Undo",
-                                        onPressed: () => Get.back(),
-                                      ),
-                                      content: const Text("Error"),
-                                      dismissDirection: DismissDirection.up,
-                                      backgroundColor: CustomColor.errorColor),
-                                );
-                              }
-                            },
-                            child: const Text("Add"),
-                          );
-                        },
+                      child: Consumer<TaskProvider>(
+                        builder: (context, value, child) => ElevatedButton(
+                          style: AppBorder.kButtonStyle(Colors.teal),
+                          onPressed: () {
+                            if (formKey.currentState!.validate()) {
+                              value.taskCollection.add({
+                                'title': titleController.text,
+                                'description': descriptionController.text,
+                                'isRemoved': false,
+                              });
+                              titleController.clear();
+                              descriptionController.clear();
+                              Get.back();
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    action: SnackBarAction(
+                                      label: "Undo",
+                                      onPressed: () => Get.back(),
+                                    ),
+                                    content: const Text("Error"),
+                                    dismissDirection: DismissDirection.up,
+                                    backgroundColor: CustomColor.errorColor),
+                              );
+                            }
+                          },
+                          child: const Text("Add"),
+                        ),
                       ),
                     ),
                   ],

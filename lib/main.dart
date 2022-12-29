@@ -6,13 +6,13 @@ import 'package:provider_test/presentation/home_screen.dart';
 import 'package:provider_test/style/custom_color.dart';
 import 'package:sizer/sizer.dart';
 
-import 'provider/list_provider.dart';
+import 'provider/task_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(ChangeNotifierProvider(
-    create: (context) => ListProvider(),
+    create: (context) => TaskProvider(),
     child: const MyApp(),
   ));
 }
