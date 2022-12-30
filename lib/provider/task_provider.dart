@@ -16,6 +16,7 @@ class TaskProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+
   void get clearDoclist {
     documentList.clear();
     notifyListeners();

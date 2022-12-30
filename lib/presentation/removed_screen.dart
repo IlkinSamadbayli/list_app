@@ -17,6 +17,9 @@ class RemovedScreen extends StatefulWidget {
 }
 
 class _RemovedScreenState extends State<RemovedScreen> {
+  bool isLoading = false;
+  final GlobalKey<RefreshIndicatorState> _refreshIndigatorKey =
+      GlobalKey<RefreshIndicatorState>();
   @override
   Widget build(BuildContext context) {
     TaskProvider taskProvider = Provider.of<TaskProvider>(context);
@@ -30,7 +33,8 @@ class _RemovedScreenState extends State<RemovedScreen> {
         centerTitle: true,
         actions: [
           GestureDetector(
-              onTap: () {
+              onTap: () async {
+                await _refreshIndigatorKey.currentState?.show();
                 taskProvider.taskCollection
                     .get()
                     .then((documents) => {
@@ -66,7 +70,19 @@ class _RemovedScreenState extends State<RemovedScreen> {
           late List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
               snapshot.data!.docs;
           if (!snapshot.hasData) {
-            return const CircularProgressIndicator();
+            return Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  padding: const EdgeInsets.all(12),
+                  color: CustomColor.mainColor,
+                  child: CircularProgressIndicator(
+                      color: CustomColor.versionColorWhite, strokeWidth: 4),
+                ),
+              ),
+            );
           }
           return Column(
             children: [
@@ -74,133 +90,154 @@ class _RemovedScreenState extends State<RemovedScreen> {
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 12),
-                    itemCount: documents.length,
-                    itemBuilder: (context, index) {
-                      String docId = documents[index].id;
-                      Map<String, dynamic> item = documents[index].data();
-                      return Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(40),
-                          color: CustomColor.primaryColor,
-                        ),
-                        width: 40,
-                        height: 10.h,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(40),
-                          child: Slidable(
-                            endActionPane: ActionPane(
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      Future<void>.delayed(const Duration(seconds: 2));
+                    },
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 12),
+                      itemCount: documents.length,
+                      itemBuilder: (context, index) {
+                        String docId = documents[index].id;
+                        Map<String, dynamic> item = documents[index].data();
+                        return Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(40),
+                            color: CustomColor.primaryColor,
+                          ),
+                          width: 40,
+                          height: 10.h,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(40),
+                            child: Slidable(
+                              endActionPane: ActionPane(
+                                  motion: const ScrollMotion(),
+                                  children: [
+                                    SlidableAction(
+                                      onPressed: (context) {
+                                        taskProvider.taskCollection
+                                            .doc(docId)
+                                            .update({'isRemoved': false});
+                                      },
+                                      backgroundColor: CustomColor.mainColor,
+                                      foregroundColor:
+                                          CustomColor.versionColorWhite,
+                                      icon: Icons.redo_rounded,
+                                      label: 'Bring it back',
+                                    ),
+                                  ]),
+                              startActionPane: ActionPane(
                                 motion: const ScrollMotion(),
                                 children: [
                                   SlidableAction(
                                     onPressed: (context) {
+                                      print(taskProvider.documentList);
                                       taskProvider.taskCollection
                                           .doc(docId)
-                                          .update({'isRemoved': false});
+                                          .delete()
+                                          .whenComplete(() => {
+                                                snackbar(true,
+                                                    'Deleted Successfully'),
+                                                taskProvider.clearDoclist,
+                                              });
                                     },
-                                    backgroundColor: CustomColor.mainColor,
+                                    backgroundColor: CustomColor.errorColor,
                                     foregroundColor:
                                         CustomColor.versionColorWhite,
-                                    icon: Icons.redo_rounded,
-                                    label: 'Bring it back',
+                                    icon: Icons.delete_forever,
+                                    label: 'Delete',
                                   ),
-                                ]),
-                            startActionPane: ActionPane(
-                              motion: const ScrollMotion(),
-                              children: [
-                                SlidableAction(
-                                  onPressed: (context) {
-                                    taskProvider.taskCollection
-                                        .doc(docId)
-                                        .delete()
-                                        .whenComplete(() => {
-                                              Get.snackbar('Snackbar',
-                                                  'Deleted Successfully',
-                                                  colorText: CustomColor
-                                                      .versionColorWhite,
-                                                  backgroundColor:
-                                                      CustomColor.mainColor,
-                                                  padding:
-                                                      const EdgeInsets.all(20),
-                                                  margin:
-                                                      const EdgeInsets.all(60),
-                                                  duration: const Duration(
-                                                      milliseconds: 800))
-                                            });
-                                  },
-                                  backgroundColor: CustomColor.errorColor,
-                                  foregroundColor:
-                                      CustomColor.versionColorWhite,
-                                  icon: Icons.delete_forever,
-                                  label: 'Delete',
-                                ),
-                              ],
-                            ),
-                            // child: const Text("remove test"),
-                            child: ListItem(
-                              docId: docId,
-                              item: item,
-                              taskProvider: taskProvider,
-                              taskLists: taskProvider.taskCollection,
+                                ],
+                              ),
+                              // child: const Text("remove test"),
+                              child: ListItem(
+                                docId: docId,
+                                item: item,
+                                taskProvider: taskProvider,
+                                taskLists: taskProvider.taskCollection,
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(right: 20, bottom: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Consumer<TaskProvider>(
-                      builder: (context, value, child) => FloatingActionButton(
-                        heroTag: "btn3",
-                        onPressed: () {
-                          value.taskCollection
-                              .get()
-                              .then((documents) => {
-                                    for (var document in documents.docs)
-                                      {
-                                        if (taskProvider.documentList
-                                            .contains(document.id))
-                                          {
-                                            value.taskCollection
-                                                .doc(document.id)
-                                                .delete()
-                                          }
-                                      }
-                                  })
-                              .whenComplete(() => {
-                                    taskProvider.clearDoclist,
-                                    Get.snackbar(
-                                        'Snackbar', 'Deleted Successfully',
-                                        colorText:
-                                            CustomColor.versionColorWhite,
-                                        backgroundColor: CustomColor.mainColor,
-                                        padding: const EdgeInsets.all(20),
-                                        margin: const EdgeInsets.all(60),
-                                        duration:
-                                            const Duration(milliseconds: 800))
-                                  });
-                        },
-                        tooltip: 'Delete',
-                        child: const Icon(Icons.delete),
+              taskProvider.documentList.isEmpty
+                  ? const SizedBox()
+                  : Padding(
+                      padding: const EdgeInsets.only(right: 20, bottom: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Consumer<TaskProvider>(
+                            builder: (context, value, child) =>
+                                FloatingActionButton(
+                              heroTag: "btn3",
+                              onPressed: () {
+                                loading;
+                                value.taskCollection
+                                    .get()
+                                    .then((documents) => {
+                                          for (var document in documents.docs)
+                                            {
+                                              if (taskProvider.documentList
+                                                  .contains(document.id))
+                                                {
+                                                  value.taskCollection
+                                                      .doc(document.id)
+                                                      .delete()
+                                                }
+                                            }
+                                        })
+                                    .whenComplete(() => {
+                                          if (taskProvider
+                                              .documentList.isNotEmpty)
+                                            {
+                                              snackbar(
+                                                  true, 'Deleted Successfully'),
+                                            },
+                                          taskProvider.clearDoclist,
+                                        });
+                              },
+                              tooltip: 'Delete',
+                              child: isLoading
+                                  ? CircularProgressIndicator(
+                                      color: CustomColor.versionColorWhite)
+                                  : const Icon(Icons.delete),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
             ],
           );
         },
       ),
     );
+  }
+
+  void get loading async {
+    setState(() {
+      isLoading = true;
+    });
+    await Future.delayed(const Duration(seconds: 5));
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  void snackbar(bool isSuccess, String message) {
+    Get.snackbar('Snackbar', message,
+        colorText: CustomColor.versionColorWhite,
+        backgroundColor:
+            isSuccess ? CustomColor.mainColor : CustomColor.errorColor,
+        padding: const EdgeInsets.all(20),
+        margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height / 5),
+        duration: const Duration(milliseconds: 1200));
   }
 }

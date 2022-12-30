@@ -19,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool isLoading = false;
   final kviewInsets = EdgeInsets.fromWindowPadding(
       WidgetsBinding.instance.window.viewInsets,
       WidgetsBinding.instance.window.devicePixelRatio);
@@ -50,6 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final taskProvider = Provider.of<TaskProvider>(context);
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       key: scaffoldKey,
@@ -113,53 +116,72 @@ class _HomeScreenState extends State<HomeScreen> {
                               QueryDocumentSnapshot<Map<String, dynamic>>>
                           documents = snapshot.data!.docs;
                       if (!snapshot.hasData) {
-                        return const CircularProgressIndicator();
-                      }
-                      return ListView.separated(
-                        shrinkWrap: true,
-                        separatorBuilder: (context, index) =>
-                            const SizedBox(height: 12),
-                        itemCount: documents.length,
-                        itemBuilder: (context, index) {
-                          Map<String, dynamic> item = documents[index].data();
-                          String docId = documents[index].id;
-                          return Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(40),
-                              color: CustomColor.primaryColor,
+                        return Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              width: 50,
+                              height: 50,
+                              padding: const EdgeInsets.all(12),
+                              color: CustomColor.mainColor,
+                              child: CircularProgressIndicator(
+                                  color: CustomColor.versionColorWhite,
+                                  strokeWidth: 4),
                             ),
-                            width: 40,
-                            height: 10.h,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(40),
-                              child: Slidable(
-                                startActionPane: ActionPane(
-                                  motion: const ScrollMotion(),
-                                  children: [
-                                    SlidableAction(
-                                      onPressed: (context) {
-                                        taskProvider.taskCollection
-                                            .doc(docId)
-                                            .update({"isRemoved": true});
-                                      },
-                                      backgroundColor: CustomColor.errorColor,
-                                      foregroundColor:
-                                          CustomColor.versionColorWhite,
-                                      icon: Icons.delete,
-                                      label: 'Delete',
-                                    ),
-                                  ],
-                                ),
-                                child: ListItem(
-                                  taskLists: taskProvider.taskCollection,
-                                  item: item,
-                                  taskProvider: taskProvider,
-                                  docId: docId,
+                          ),
+                        );
+                      }
+                      return RefreshIndicator(
+                        onRefresh: () async {
+                          return Future<void>.delayed(
+                              const Duration(seconds: 4));
+                        },
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: 12),
+                          itemCount: documents.length,
+                          itemBuilder: (context, index) {
+                            Map<String, dynamic> item = documents[index].data();
+                            String docId = documents[index].id;
+                            return Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(40),
+                                color: CustomColor.primaryColor,
+                              ),
+                              width: 40,
+                              height: 10.h,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(40),
+                                child: Slidable(
+                                  startActionPane: ActionPane(
+                                    motion: const ScrollMotion(),
+                                    children: [
+                                      SlidableAction(
+                                        onPressed: (context) {
+                                          taskProvider.taskCollection
+                                              .doc(docId)
+                                              .update({"isRemoved": true});
+                                        },
+                                        backgroundColor: CustomColor.errorColor,
+                                        foregroundColor:
+                                            CustomColor.versionColorWhite,
+                                        icon: Icons.delete,
+                                        label: 'Delete',
+                                      ),
+                                    ],
+                                  ),
+                                  child: ListItem(
+                                    taskLists: taskProvider.taskCollection,
+                                    item: item,
+                                    taskProvider: taskProvider,
+                                    docId: docId,
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       );
                     },
                   ),
@@ -173,41 +195,47 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Consumer<TaskProvider>(
-                    builder: (context, taskProvider, child) =>
-                        FloatingActionButton(
-                      heroTag: "btn1",
-                      onPressed: () {
-                        taskProvider.taskCollection
-                            .get()
-                            .then((documents) => {
-                                  for (var document in documents.docs)
-                                    {
-                                      if (taskProvider.documentList
-                                          .contains(document.id))
-                                        {
-                                          taskProvider.taskCollection
-                                              .doc(document.id)
-                                              .update({
-                                            'isRemoved': true,
-                                          }),
-                                        }
-                                    }
-                                })
-                            .whenComplete(() {
-                          taskProvider.clearDoclist;
-                        });
-                        print(
-                            "documentList: ${taskProvider.documentList.length}");
-                      },
-                      tooltip: 'Delete',
-                      child: const Icon(Icons.delete_rounded),
-                    ),
-                  ),
+                  taskProvider.documentList.isEmpty
+                      ? const SizedBox()
+                      : Consumer<TaskProvider>(
+                          builder: (context, taskProvider, child) =>
+                              FloatingActionButton(
+                            heroTag: "btn1",
+                            onPressed: () async {
+                              loading;
+                              taskProvider.taskCollection
+                                  .get()
+                                  .then((documents) => {
+                                        for (var document in documents.docs)
+                                          {
+                                            if (taskProvider.documentList
+                                                .contains(document.id))
+                                              {
+                                                taskProvider.taskCollection
+                                                    .doc(document.id)
+                                                    .update({
+                                                  'isRemoved': true,
+                                                }),
+                                              }
+                                          }
+                                      })
+                                  .whenComplete(() {
+                                taskProvider.clearDoclist;
+                              });
+                              print(
+                                  "documentList: ${taskProvider.documentList.length}");
+                            },
+                            tooltip: 'Delete',
+                            child: isLoading
+                                ? const CircularProgressIndicator()
+                                : const Icon(Icons.delete_rounded),
+                          ),
+                        ),
                   const SizedBox(width: 16),
                   FloatingActionButton(
                     heroTag: "btn2",
-                    onPressed: () {
+                    onPressed: () async {
+                      await Future.delayed(const Duration(seconds: 3));
                       triggerBottomSheet;
                     },
                     tooltip: 'Show',
@@ -217,6 +245,22 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void get loading {
+    Center(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: 50,
+          height: 50,
+          padding: const EdgeInsets.all(12),
+          color: CustomColor.mainColor,
+          child: CircularProgressIndicator(
+              color: CustomColor.versionColorWhite, strokeWidth: 4),
         ),
       ),
     );
@@ -297,16 +341,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               descriptionController.clear();
                               Get.back();
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    action: SnackBarAction(
-                                      label: "Undo",
-                                      onPressed: () => Get.back(),
-                                    ),
-                                    content: const Text("Error"),
-                                    dismissDirection: DismissDirection.up,
-                                    backgroundColor: CustomColor.errorColor),
-                              );
+                              snackbar(false, "Please fill input");
                             }
                           },
                           child: const Text("Add"),
@@ -322,5 +357,25 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
     );
+  }
+
+  void get triggerLoading async {
+    setState(() {
+      isLoading = true;
+    });
+    await Future.delayed(const Duration(seconds: 5));
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  void snackbar(bool isSuccess, String message) {
+    Get.snackbar('Snackbar', message,
+        colorText: CustomColor.versionColorWhite,
+        backgroundColor:
+            isSuccess ? CustomColor.mainColor : CustomColor.errorColor,
+        padding: const EdgeInsets.all(20),
+        margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height / 5),
+        duration: const Duration(milliseconds: 1200));
   }
 }
